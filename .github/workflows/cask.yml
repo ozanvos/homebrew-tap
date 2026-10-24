@@ -42,7 +42,8 @@ jobs:
           retry() {
             for attempt in 1 2 3; do
               if "$@"; then return 0; fi
-              sleep 5
+              echo "Apple validation attempt $attempt failed."
+              if [ "$attempt" -lt 3 ]; then sleep 5; fi
             done
             return 1
           }
