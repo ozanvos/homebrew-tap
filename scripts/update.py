@@ -25,7 +25,9 @@ def require(condition, message):
 
 
 def main():
-    release = json.loads(read(f"https://api.github.com/repos/{REPOSITORY}/releases/latest"))
+    release = json.loads(subprocess.check_output([
+        "gh", "api", f"repos/{REPOSITORY}/releases/latest",
+    ], text=True))
     tag = release["tag_name"]
     require(re.fullmatch(r"v\d+\.\d+\.\d+", tag), "Expected stable version tag")
     require(not release["draft"] and not release["prerelease"], "Release must be public and stable")
