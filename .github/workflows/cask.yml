@@ -38,8 +38,16 @@ jobs:
         run: |
           brew install --cask ozanvos/tap/monoprint
           codesign --verify --deep --strict /Applications/Monoprint.app
-          xcrun stapler validate /Applications/Monoprint.app
-          spctl --assess --type execute --verbose=2 /Applications/Monoprint.app
+          # Apple's ticket service can transiently drop runner connections.
+          retry() {
+            for attempt in 1 2 3; do
+              if "$@"; then return 0; fi
+              sleep 5
+            done
+            return 1
+          }
+          retry xcrun stapler validate /Applications/Monoprint.app
+          retry spctl --assess --type execute --verbose=2 /Applications/Monoprint.app
           monoprint --version
           printf 'const answer = 42;\n' > "$RUNNER_TEMP/example.ts"
           monoprint "$RUNNER_TEMP/example.ts" -o "$RUNNER_TEMP/example.png"
