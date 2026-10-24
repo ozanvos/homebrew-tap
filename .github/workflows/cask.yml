@@ -1,0 +1,57 @@
+name: Verify and update cask
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: '23 7 * * *'
+permissions:
+  contents: read
+concurrency:
+  group: cask-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  verify:
+    runs-on: macos-15
+    permissions:
+      contents: write
+    env:
+      HOMEBREW_NO_AUTO_UPDATE: '1'
+      HOMEBREW_NO_ANALYTICS: '1'
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify upstream release and update cask
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        run: python3 scripts/update.py
+      - name: Load this cask into Homebrew
+        run: |
+          brew tap ozanvos/tap "$GITHUB_WORKSPACE"
+          cp Casks/monoprint.rb "$(brew --repository ozanvos/tap)/Casks/monoprint.rb"
+      - name: Check cask style and metadata
+        run: |
+          brew style --cask ozanvos/tap/monoprint
+          brew audit --cask --online ozanvos/tap/monoprint
+      - name: Install and verify the shipped app and CLI
+        run: |
+          brew install --cask ozanvos/tap/monoprint
+          codesign --verify --deep --strict /Applications/Monoprint.app
+          xcrun stapler validate /Applications/Monoprint.app
+          spctl --assess --type execute --verbose=2 /Applications/Monoprint.app
+          monoprint --version
+          printf 'const answer = 42;\n' > "$RUNNER_TEMP/example.ts"
+          monoprint "$RUNNER_TEMP/example.ts" -o "$RUNNER_TEMP/example.png"
+          test -s "$RUNNER_TEMP/example.png"
+          brew uninstall --cask monoprint
+          test ! -e /Applications/Monoprint.app
+          test ! -e "$(brew --prefix)/bin/monoprint"
+      - name: Publish verified cask update
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        run: |
+          if git diff --quiet -- Casks/monoprint.rb; then exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add Casks/monoprint.rb
+          git commit -m 'Update Monoprint cask from verified release'
+          git push origin HEAD:main
