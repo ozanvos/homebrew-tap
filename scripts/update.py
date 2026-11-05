@@ -63,8 +63,10 @@ def main():
         require(download["sha256"] == entry["sha256"] and download["bytes"] == entry["bytes"]
                 and download["url"] == f"{BASE}/download/{tag}/{download['file']}", "Invalid download")
     download = manifest["downloads"]["macos-arm64"]
-    filename = f"Monoprint-{version}-aarch64-apple-darwin.zip"
-    require(download["file"] == filename, "Unexpected macOS archive")
+    filename = download["file"]
+    stem = f"Monoprint-{version}-aarch64-apple-darwin"
+    require(filename in [stem + ".zip", stem + ".dmg"], "Unexpected macOS installer")
+    extension = filename.rsplit(".", 1)[1]
     require("appcast-macos-arm64.xml" in files, "Missing Sparkle feed")
     current = CASK.read_text()
     old_version = re.search(r'  version "([^"]+)"', current).group(1)
@@ -91,6 +93,9 @@ def main():
 
     updated = current.replace(f'  version "{old_version}"', f'  version "{version}"')
     updated = updated.replace(f'  sha256 "{old_sha}"', f'  sha256 "{download["sha256"]}"')
+    url = '  url "' + BASE + '/download/v#{version}/Monoprint-#{version}-aarch64-apple-darwin.' + extension + '"'
+    updated, count = re.subn(r'^  url "[^"\n]+"$', lambda match: url, updated, flags=re.MULTILINE)
+    require(count == 1, "Expected one cask download URL")
     CASK.write_text(updated)
     print(f"Verified Monoprint {version}" + ("; cask updated" if updated != current else "; cask current"))
 
