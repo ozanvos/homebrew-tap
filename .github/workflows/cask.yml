@@ -32,6 +32,8 @@ jobs:
         run: |
           brew tap ozanvos/tap "$GITHUB_WORKSPACE"
           cp Casks/monoprint.rb "$(brew --repository ozanvos/tap)/Casks/monoprint.rb"
+          # Trust only this reviewed cask in the ephemeral verification runner.
+          brew trust --cask ozanvos/tap/monoprint
       - name: Check cask style and metadata
         run: |
           brew style --cask ozanvos/tap/monoprint
