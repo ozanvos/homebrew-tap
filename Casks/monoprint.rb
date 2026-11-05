@@ -1,8 +1,8 @@
 cask "monoprint" do
-  version "0.1.4"
-  sha256 "4fe312ea9b0ea9d6aa4a857035f71124a371b57d8b1cb450102109c8fdb058b7"
+  version "0.2.2"
+  sha256 "21a85bd790e5b234e88cee564d987d2f79a6a82441f69e48797358702888ea8a"
 
-  url "https://github.com/ozanvos/monoprint/releases/download/v#{version}/Monoprint-#{version}-aarch64-apple-darwin.zip"
+  url "https://github.com/ozanvos/monoprint/releases/download/v#{version}/Monoprint-#{version}-aarch64-apple-darwin.dmg"
   name "Monoprint"
   desc "Create code images locally"
   homepage "https://monoprint.7ea.st/"
