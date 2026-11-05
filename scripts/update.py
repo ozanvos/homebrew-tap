@@ -62,9 +62,10 @@ def main():
         entry = files[download["file"]]
         require(download["sha256"] == entry["sha256"] and download["bytes"] == entry["bytes"]
                 and download["url"] == f"{BASE}/download/{tag}/{download['file']}", "Invalid download")
-    download = manifest["downloads"]["macos-arm64"]
     filename = f"Monoprint-{version}-aarch64-apple-darwin.zip"
-    require(download["file"] == filename, "Unexpected macOS archive")
+    # The website may offer a DMG; Homebrew keeps the immutable update ZIP.
+    require(filename in files, "Missing macOS ZIP archive")
+    download = files[filename]
     require("appcast-macos-arm64.xml" in files, "Missing Sparkle feed")
     current = CASK.read_text()
     old_version = re.search(r'  version "([^"]+)"', current).group(1)

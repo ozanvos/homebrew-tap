@@ -23,6 +23,8 @@ jobs:
       HOMEBREW_GITHUB_API_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
+      - name: Test release archive selection
+        run: python3 scripts/test_update.py
       - name: Verify upstream release and update cask
         if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         run: python3 scripts/update.py
