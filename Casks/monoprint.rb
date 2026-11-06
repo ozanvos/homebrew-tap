@@ -1,6 +1,6 @@
 cask "monoprint" do
-  version "0.2.2"
-  sha256 "21a85bd790e5b234e88cee564d987d2f79a6a82441f69e48797358702888ea8a"
+  version "0.2.3"
+  sha256 "ffd1922a93db21ca41bdfe8cb3fdff886f41f075c8948a83752f82a5a20b310d"
 
   url "https://github.com/ozanvos/monoprint/releases/download/v#{version}/Monoprint-#{version}-aarch64-apple-darwin.dmg"
   name "Monoprint"
